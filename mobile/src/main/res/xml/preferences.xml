@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="@string/pref_autoDetect"
+        android:entries="@array/modes"
+        android:entryValues="@array/modes"
+        android:key="pref_mode"
+        android:title="@string/pref_mode" />
+    <PreferenceScreen android:title="@string/pref_editLevels">
+        <EditTextPreference
+            android:defaultValue="1"
+            android:key="pref_low"
+            android:title="@string/pref_lowValue"
+            android:inputType="number"
+            />
+        <EditTextPreference
+            android:defaultValue="62"
+            android:key="pref_mediumLow"
+            android:title="@string/pref_mediumLowValue"
+            android:inputType="number"
+            />
+        <EditTextPreference
+            android:defaultValue="125"
+            android:key="pref_medium"
+            android:title="@string/pref_mediumValue"
+            android:inputType="number"
+            />
+        <EditTextPreference
+            android:defaultValue="187"
+            android:key="@string/pref_mediumHighValue"
+            android:title="@string/pref_mediumHighValue"
+            android:inputType="number"
+            />
+        <EditTextPreference
+            android:defaultValue="255"
+            android:key="@string/pref_highValue"
+            android:title="@string/pref_highValue"
+            android:inputType="number"
+            />
+    </PreferenceScreen>
+    <PreferenceCategory
+        android:key="pref_categories"
+        android:title="@string/category_detection">
+        <ListPreference
+            android:defaultValue="@string/pref_highValue"
+            android:entries="@array/levels"
+            android:entryValues="@array/levels"
+            android:key="pref_driving"
+            android:title="@string/pref_inVehicle" />
+        <ListPreference
+            android:defaultValue="@string/pref_highValue"
+            android:entries="@array/levels"
+            android:entryValues="@array/levels"
+            android:key="pref_onBicycle"
+            android:title="@string/pref_onBicycle" />
+        <ListPreference
+            android:defaultValue="@string/pref_highValue"
+            android:entries="@array/levels"
+            android:entryValues="@array/levels"
+            android:key="pref_onFoot"
+            android:title="@string/pref_onFoot" />
+        <ListPreference
+            android:defaultValue="@string/pref_mediumHighValue"
+            android:entries="@array/levels"
+            android:entryValues="@array/levels"
+            android:key="pref_unknown"
+            android:title="@string/pref_unknown" />
+        <ListPreference
+            android:defaultValue="@string/pref_mediumValue"
+            android:entries="@array/levels"
+            android:entryValues="@array/levels"
+            android:key="pref_manual"
+            android:title="@string/pref_manual" />
+    </PreferenceCategory>
+
+
+
+</PreferenceScreen>

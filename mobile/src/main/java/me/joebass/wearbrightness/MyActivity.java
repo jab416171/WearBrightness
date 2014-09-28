@@ -1,12 +1,18 @@
 package me.joebass.wearbrightness;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
+import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceGroup;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +32,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class MyActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SensorEventListener {
+public class MyActivity extends PreferenceActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SensorEventListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "WearBrightness";
 
     private GoogleApiClient mGoogleApiClient;
@@ -40,15 +47,16 @@ public class MyActivity extends Activity implements GoogleApiClient.ConnectionCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
+//        setContentView(R.layout.activity_my);
+        addPreferencesFromResource(R.xml.preferences);
         devices = new HashSet<String>();
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Wearable.API)
                 .build();
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        initSummary(getPreferenceScreen());
 
     }
 
@@ -96,12 +104,14 @@ public class MyActivity extends Activity implements GoogleApiClient.ConnectionCa
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT), SensorManager.SENSOR_DELAY_NORMAL);
+        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
+        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -160,6 +170,41 @@ public class MyActivity extends Activity implements GoogleApiClient.ConnectionCa
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        updatePrefSummary(findPreference(key));
+    }
+
+    private void updatePrefSummary(Preference p) {
+        if (p instanceof ListPreference) {
+            ListPreference listPref = (ListPreference) p;
+            p.setSummary(listPref.getEntry());
+        }
+        if (p instanceof EditTextPreference) {
+            EditTextPreference editTextPref = (EditTextPreference) p;
+            if (p.getTitle().toString().toLowerCase().contains("password")) {
+                p.setSummary("******");
+            } else {
+                p.setSummary(editTextPref.getText());
+            }
+        }
+        if (p instanceof MultiSelectListPreference) {
+            EditTextPreference editTextPref = (EditTextPreference) p;
+            p.setSummary(editTextPref.getText());
+        }
+    }
+
+    private void initSummary(Preference p) {
+        if (p instanceof PreferenceGroup) {
+            PreferenceGroup pGrp = (PreferenceGroup) p;
+            for (int i = 0; i < pGrp.getPreferenceCount(); i++) {
+                initSummary(pGrp.getPreference(i));
+            }
+        } else {
+            updatePrefSummary(p);
+        }
     }
 
     public interface OnGotNodesListener {
