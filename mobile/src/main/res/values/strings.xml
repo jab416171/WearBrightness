@@ -2,32 +2,13 @@
 <resources>
 
     <string name="app_name">Auto Brightness for Wear</string>
+    <string name="app_name_short">Wear Brightness</string>
     <string name="action_settings">Settings</string>
     <string name="category_detection">Brightness Levels</string>
-    <string name="pref_highValue">Highest</string>
-    <string name="pref_mediumHighValue">Medium High</string>
-    <string name="pref_mediumValue">Medium</string>
-    <string name="pref_mediumLowValue">Medium Low</string>
-    <string name="pref_lowValue">Lowest</string>
-    <item name="default_highValue" format="float" type="integer">1.0</item>
-    <item name="default_mediumHighValue" format="float" type="string">0.7</item>
-    <item name="default_mediumValue" format="float" type="string">0.5</item>
-    <item name="default_mediumLowValue" format="float" type="string">0.3</item>
-    <item name="default_lowValue" format="float" type="string">0.1</item>
-    <string name="pref_editLevels">Edit Levels</string>
-    <string-array name="levels">
-        <item name="item_highValue">Highest</item>
-        <item name="item_mediumHighValue">Medium High</item>
-        <item name="item_mediumValue">Medium</item>
-        <item name="item_mediumLowValue">Medium Low</item>
-        <item name="item_lowValue">Lowest</item>
-    </string-array>
     <string name="pref_inVehicle">Driving</string>
     <string name="pref_onBicycle">On Bicycle</string>
     <string name="pref_onFoot">On Foot</string>
-    <string name="pref_onFootSummary">Walking or Running</string>
     <string name="pref_unknown">No Activity Detected</string>
-    <string name="pref_unknownSummary">The system could not detect whether you\'re walking, driving, or bicycling</string>
     <string name="pref_mode">Detection Mode</string>
     <string name="pref_autoDetect">Auto Detect</string>
     <string name="pref_manual">Manual</string>

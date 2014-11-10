@@ -6,6 +6,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -13,6 +15,8 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -22,12 +26,11 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.Map;
 
 
 public class WearPreferences extends PreferenceFragment implements SensorEventListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
-    private int newBrightness = 255;
 
     private static final String TAG = "WearBrightness";
 
@@ -35,7 +38,19 @@ public class WearPreferences extends PreferenceFragment implements SensorEventLi
 
     private SensorManager mSensorManager;
 
-    private Set<String> devices;
+    private Sensor mSignificantMotionSensor;
+
+    private TriggerEventListener mTriggerEventListener;
+
+    private SharedPreferences preferences;
+
+    private String prefModeKey;
+
+    private String prefUsePhoneSensor;
+
+    private String prefAutoDetect;
+
+    private String prefManual;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,7 +59,26 @@ public class WearPreferences extends PreferenceFragment implements SensorEventLi
         addPreferencesFromResource(R.xml.preferences);
         mGoogleApiClient = ((WearActivity) getActivity()).getGoogleApiClient();
         mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        mSignificantMotionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
         initSummary(getPreferenceScreen());
+        mTriggerEventListener = new TriggerEventListener() {
+            @Override
+            public void onTrigger(TriggerEvent event) {
+                Log.v(TAG, event.toString());
+            }
+        };
+        mSensorManager.requestTriggerSensor(mTriggerEventListener, mSignificantMotionSensor);
+
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Map<String, ?> all = preferences.getAll();
+        for (Map.Entry<String, ?> stringEntry : all.entrySet()) {
+            Log.v(TAG, stringEntry.getKey() + "->" + stringEntry.getValue());
+        }
+        prefModeKey = "pref_mode";
+        prefUsePhoneSensor = getString(R.string.pref_useSensor);
+        prefAutoDetect = getString(R.string.pref_autoDetect);
+        prefManual = getString(R.string.pref_manual);
 
     }
 
@@ -64,16 +98,20 @@ public class WearPreferences extends PreferenceFragment implements SensorEventLi
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        int newBrightnessAuto = 255;
         float value = event.values[0];
         if (value > 5) {
-            newBrightness = 255;
+            newBrightnessAuto = 255;
         } else {
-            newBrightness = 1;
+            newBrightnessAuto = 1;
         }
-        updateDataItem();
+        String detectionMode = preferences.getString(prefModeKey, prefUsePhoneSensor);
+        if (detectionMode.equals(prefUsePhoneSensor)) {
+            updateDataItem(newBrightnessAuto);
+        }
     }
 
-    private void updateDataItem() {
+    private void updateDataItem(int newBrightness) {
         PutDataMapRequest putRequest = PutDataMapRequest.create("/brightness");
         DataMap map = putRequest.getDataMap();
         map.putInt("BRIGHTNESS", newBrightness);
@@ -92,6 +130,9 @@ public class WearPreferences extends PreferenceFragment implements SensorEventLi
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         updatePrefSummary(findPreference(key));
+        if (preferences.getString(prefModeKey, prefManual).equals(prefManual) && (key.equals("pref_manual") || key.equals(prefModeKey))) {
+            updateDataItem(sharedPreferences.getInt("pref_manual", 0));
+        }
     }
 
     private void updatePrefSummary(Preference p) {
